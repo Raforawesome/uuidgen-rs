@@ -9,7 +9,6 @@ static USED: Mutex<Vec<String>> = Mutex::new(vec![]);
 
 
 fn random_num(rng: &mut ThreadRng, min: i32, mut max: i32) -> i32 {
-	max += 1;
 	let alpha: f32 = rand::random::<f32>();
 	min + ((max - min) as f32 * alpha) as i32
 }
@@ -19,7 +18,7 @@ fn random_char(rng: &mut ThreadRng) -> char {
 	CHARS.bytes().collect::<Vec<u8>>()[idx] as char
 }
 
-pub fn gen_uuid(dashed: bool) -> String {
+pub fn gen_id(dashed: bool) -> String {
 	let mut rng: ThreadRng = rand::thread_rng();
 	if dashed {
 		let mut s: String = String::new();
@@ -31,15 +30,32 @@ pub fn gen_uuid(dashed: bool) -> String {
 				s.push('-')
 			}
 		}
-		add_uuid(s.clone());
 		s
 	} else {
 		let mut s: String = String::new();
 		for _ in 0..LENGTH {
 			s.push(random_char(&mut rng));
 		}
-		add_uuid(s.clone());
 		s
+	}
+}
+
+pub fn gen_uuid(dashed: bool) -> String {
+	let mut s: String = String::new();
+	if dashed {
+		loop {
+			s = gen_id(true);
+			if !uuid_exists(&s) {
+				return s;
+			}
+		}
+	} else {
+		loop {
+			s = gen_id(false);
+			if !uuid_exists(&s) {
+				return s;
+			}
+		}
 	}
 }
 
@@ -48,5 +64,17 @@ fn add_uuid(s: String) {
 	// I assume this same thread will never have the mutex elsewhere
 	// And that this code will never panic while using this mutex
 	let mut guard = USED.lock().unwrap();
+	let s = s.replace('-', "");
 	guard.push(s);
+}
+
+fn uuid_exists(id: &str) -> bool {
+	let guard = USED.lock().unwrap();
+	let it = guard.iter();
+	for s in it {
+		if s.replace('-', "") == id {
+			return true;
+		}
+	}
+	false
 }
