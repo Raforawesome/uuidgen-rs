@@ -2,6 +2,8 @@
 name = "uuidgen"
 version = "0.1.0"
 edition = "2021"
+description = "A very simple crate with the capability to generate unique and non-unique random 16 character ids."
+repository = "https://github.com/Raforawesome/uuidgen-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
