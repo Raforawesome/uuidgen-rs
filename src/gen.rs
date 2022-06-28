@@ -31,12 +31,14 @@ pub fn gen_uuid(dashed: bool) -> String {
 				s.push('-')
 			}
 		}
+		add_uuid(s.clone());
 		s
 	} else {
 		let mut s: String = String::new();
 		for _ in 0..LENGTH {
 			s.push(random_char(&mut rng));
 		}
+		add_uuid(s.clone());
 		s
 	}
 }
@@ -46,4 +48,5 @@ fn add_uuid(s: String) {
 	// I assume this same thread will never have the mutex elsewhere
 	// And that this code will never panic while using this mutex
 	let mut guard = USED.lock().unwrap();
+	guard.push(s);
 }
